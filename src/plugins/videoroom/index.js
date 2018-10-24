@@ -67,7 +67,9 @@ class VideoRoomPlugin extends Plugin {
                 id: handleId,
                 plugin: this
             }));
-            resolve(this.getHandle(handleId));
+            var defaultHandle = this.getHandle(handleId);
+            this.$defaultHandle = defaultHandle;
+            resolve(defaultHandle);
         });
     }
 
