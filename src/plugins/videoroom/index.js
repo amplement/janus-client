@@ -32,10 +32,11 @@ class VideoRoomPlugin extends Plugin {
         this.$defaultHandle = null;
     }
 
-    defaultHandle() {
+    defaultHandle(options) {
         return new Promise((resolve, reject)=>{
             if(this.$defaultHandle === null) {
-                this.createVideoRoomHandle().then((handle)=>{
+                this.createVideoRoomHandle(options)
+                .then((handle)=>{
                     this.$defaultHandle = handle;
                     resolve(this.$defaultHandle);
                 }).catch((err)=>{
@@ -62,11 +63,12 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    attachVideoRoomHandle(handleId) {
+    attachVideoRoomHandle(handleId, opaqueId) {
         return new Promise((resolve)=>{
             this.addHandle(new VideoRoomHandle({
                 id: handleId,
-                plugin: this
+                plugin: this,
+                opaqueId: opaqueId
             }));
             var defaultHandle = this.getHandle(handleId);
             this.$defaultHandle = defaultHandle;
@@ -74,13 +76,15 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    createPublisherHandle(room, options) {
+    createPublisherHandle(room, opaqueId) {
+        var options = { opaqueId: opaqueId };
         return new Promise((resolve, reject)=>{
             this.createHandle(options).then((id)=>{
                 this.addHandle(new VideoRoomPublisher({
                     id: id,
                     plugin: this,
-                    room: room
+                    room: room,
+                    opaqueId: opaqueId
                 }));
                 resolve(this.getHandle(id));
             }).catch((err)=>{
@@ -89,18 +93,20 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    attachPublisherHandle(handleId, room) {
+    attachPublisherHandle(handleId, room, opaqueId) {
         return new Promise((resolve)=>{
             this.addHandle(new VideoRoomPublisher({
                 id: handleId,
                 plugin: this,
-                room: room
+                room: room,
+                opaqueId: opaqueId
             }));
             resolve(this.getHandle(handleId));
         });
     }
 
-    createListenerHandle(room, feed, options) {
+    createListenerHandle(room, feed, opaqueId) {
+        var options = { opaqueId: opaqueId };
         return new Promise((resolve, reject)=>{
             this.createHandle(options)
             .then((id)=>{
@@ -108,7 +114,8 @@ class VideoRoomPlugin extends Plugin {
                     id: id,
                     plugin: this,
                     room: room,
-                    feed: feed
+                    feed: feed,
+                    opaqueId: opaqueId
                 }));
                 resolve(this.getHandle(id));
             }).catch((err)=>{
@@ -117,23 +124,24 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    attachListenerHandle(handleId, room, feed) {
+    attachListenerHandle(handleId, room, feed, opaqueId) {
         return new Promise((resolve)=>{
             this.addHandle(new VideoRoomListener({
                 id: handleId,
                 plugin: this,
                 room: room,
-                feed: feed
+                feed: feed,
+                opaqueId: opaqueId
             }));
             resolve(this.getHandle(handleId));
         });
     }
 
-    publishFeed(room, offer) {
+    publishFeed(room, offer, opaqueId) {
         return new Promise((resolve, reject)=>{
             var handle = null;
             Promise.resolve().then(()=>{
-                return this.createPublisherHandle(room);
+                return this.createPublisherHandle(room, opaqueId);
             }).then((createdHandle)=>{
                 handle = createdHandle;
                 return handle.createAnswer(offer);
@@ -145,11 +153,11 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    listenFeed(room, feed) {
+    listenFeed(room, feed, opaqueId) {
         return new Promise((resolve, reject)=>{
             var handle = null;
             Promise.resolve().then(()=>{
-                return this.createListenerHandle(room, feed);
+                return this.createListenerHandle(room, feed, opaqueId);
             }).then((createdHandle)=>{
                 handle = createdHandle;
                 return handle.createOffer();
