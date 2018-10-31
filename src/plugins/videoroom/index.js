@@ -77,6 +77,7 @@ class VideoRoomPlugin extends Plugin {
     }
 
     createPublisherHandle(room, opaqueId) {
+        var options = { opaqueId: opaqueId };
         return new Promise((resolve, reject)=>{
             this.createHandle(options).then((id)=>{
                 this.addHandle(new VideoRoomPublisher({
@@ -105,6 +106,7 @@ class VideoRoomPlugin extends Plugin {
     }
 
     createListenerHandle(room, feed, opaqueId) {
+        var options = { opaqueId: opaqueId };
         return new Promise((resolve, reject)=>{
             this.createHandle(options)
             .then((id)=>{
